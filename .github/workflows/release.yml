@@ -1,0 +1,55 @@
+name: Release
+on:
+  push:
+    # Sequence of patterns matched against refs/tags
+    tags:
+      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+
+jobs:
+  build:
+    name: Release
+    runs-on: ubuntu-latest
+    if: github.repository == 'rpanderson/workflow-sandbox'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@master
+      - name: Install Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.8
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+      - name: Build Distribution
+        run: |
+          python setup.py sdist bdist_wheel
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@latest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: ${{ env.tag }}
+          draft: true
+          prerelease: ${{ contains(github.ref, 'rc') }}
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./dist/workflow-sandbox-${{ env.tag }}.tar.gz
+          asset_name: workflow-sandbox-${{ env.tag }}.tar.gz
+          asset_content_type: application/gzip
+      - name: Publish on TestPyPI
+        uses: pypa/gh-action-pypi-publish@master
+        with:
+          user: __token__
+          password: ${{ secrets.testpypi }}
+          repository_url: https://test.pypi.org/legacy/
+      # - name: Publish on PyPI
+      #   uses: pypa/gh-action-pypi-publish@master
+      #   with:
+      #     user: __token__
+      #     password: ${{ secrets.pypi }}
