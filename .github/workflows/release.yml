@@ -5,10 +5,6 @@ on:
     tags:
       - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
 
-env:
-  TAG: "${GITHUB_REF/refs\/tags\/v/}"  # clean tag
-  VER: "${TAG/rc*/}"  # remove pre-release identifier
-
 jobs:
   build:
     name: Release
@@ -27,6 +23,11 @@ jobs:
       - name: Build Distribution
         run: |
           python setup.py sdist bdist_wheel
+      - name: Cleanup Tag
+        id: cleanup_tag
+        run: |
+          TAG="${GITHUB_REF/refs\/tags\/v/}"  # clean tag
+          echo "::set-env name=tag::$TAG"
       - name: Create Release
         id: create_release
         uses: actions/create-release@latest
