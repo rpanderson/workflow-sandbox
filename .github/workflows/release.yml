@@ -1,14 +1,17 @@
 name: Release
 on:
   push:
-    # Sequence of patterns matched against refs/tags
-    tags:
-      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+    branches:
+      # Only build releases for master and release branches
+      - master
+      - release*
 
 jobs:
-  build:
+  release:
     name: Release
     runs-on: ubuntu-latest
+    env:
+      version: ${{ github.ref }//v}
     if: github.repository == 'rpanderson/workflow-sandbox'
     steps:
       - name: Checkout
@@ -17,44 +20,41 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: 3.8
-      - name: Install Dependencies
-        run: |
-          python -m pip install --upgrade pip setuptools wheel
       - name: Build Distribution
         run: |
+          python -m pip install --upgrade pip setuptools wheel
           python setup.py sdist bdist_wheel
-      - name: Cleanup Tag
-        id: cleanup_tag
-        run: |
-          TAG="${GITHUB_REF/refs\/tags\/v/}"  # clean tag
-          echo "::set-env name=tag::$TAG"
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@latest
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: ${{ env.tag }}
-          draft: true
-          prerelease: ${{ contains(github.ref, 'rc') }}
-      - name: Upload Release Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./dist/workflow-sandbox-${{ env.tag }}.tar.gz
-          asset_name: workflow-sandbox-${{ env.tag }}.tar.gz
-          asset_content_type: application/gzip
       - name: Publish on TestPyPI
         uses: pypa/gh-action-pypi-publish@master
         with:
           user: __token__
           password: ${{ secrets.testpypi }}
           repository_url: https://test.pypi.org/legacy/
-      # - name: Publish on PyPI
-      #   uses: pypa/gh-action-pypi-publish@master
-      #   with:
-      #     user: __token__
-      #     password: ${{ secrets.pypi }}
+      # Only publish tagged merges elsewhere
+      - name: Create GitHub Release
+        if: startsWith(github.event.ref, 'refs/tags') && startsWith(github.ref, 'v')
+        id: create_release
+        uses: actions/create-release@latest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: ${{ env.version }}
+          draft: true
+          prerelease: ${{ contains(github.ref, 'rc') }}
+      - name: Upload Release Asset
+        if: startsWith(github.event.ref, 'refs/tags') && startsWith(github.ref, 'v')
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./dist/workflow-sandbox-${{ env.version }}.tar.gz
+          asset_name: workflow-sandbox-${{ env.version }}.tar.gz
+          asset_content_type: application/gzip
+      - name: Publish on PyPI
+        if: startsWith(github.event.ref, 'refs/tags') && startsWith(github.ref, 'v')
+        uses: pypa/gh-action-pypi-publish@master
+        with:
+          user: __token__
+          password: ${{ secrets.pypi }}
