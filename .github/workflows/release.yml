@@ -9,6 +9,16 @@ on:
       - 'v*'
 
 jobs:
+  debug:
+    runs-on: ubuntu-latest
+    if: github.repository == 'rpanderson/workflow-sandbox'
+    steps:
+      - run: |
+          echo ${{ github.ref }}
+          echo ${{ github.event }}
+          echo ${{ github.event.ref }}
+          echo ${{ github.event.ref_type }}
+          echo ${{ github.actor }}
   release:
     name: Release
     runs-on: ubuntu-latest
