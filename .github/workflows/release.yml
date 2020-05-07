@@ -26,8 +26,6 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
-    env:
-      VERSION: ${${{ github.event.ref }}//v}
     if: github.repository == 'rpanderson/workflow-sandbox'
     steps:
       - name: Checkout
@@ -54,6 +52,11 @@ jobs:
           password: ${{ secrets.testpypi }}
           repository_url: https://test.pypi.org/legacy/
       # Only publish tagged merges elsewhere
+      - name: Get Version Number
+        if: github.event.ref_type == 'tag'
+        run: |
+          TAG="${GITHUB_REF/refs\/tags\/v/}"  # clean tag
+          echo "::set-env name=VERSION::$TAG"
       - name: Create GitHub Release
         if: github.event.ref_type == 'tag'
         id: create_release
