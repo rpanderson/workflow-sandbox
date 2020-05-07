@@ -1,11 +1,4 @@
 # workflow-sandbox
-
-[![Build Status](https://api.cirrus-ci.com/github/rpanderson/workflow-sandbox.svg)](https://cirrus-ci.com/rpanderson/workflow-sandbox)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/python/black)
-[![License](https://img.shields.io/pypi/l/workflow-sandbox.svg)](https://github.com/rpanderson/workflow-sandbox/raw/master/LICENSE)
-[![PyPI](https://img.shields.io/pypi/v/workflow-sandbox.svg)](https://pypi.org/project/napari)
-[![Python Version](https://img.shields.io/pypi/pyversions/workflow-sandbox.svg)](https://python.org)
-
 Testing GitHub actions, Cirrus CI, documentation, and publishing releases of Python packages.
 
 This will be a Python package on test PyPI in its own right, with package name `workflow-sandbox` and module name `workflow_sandbox` (yes, the mixing of hyphenation and underscores is inelegant but deliberate).
