@@ -1,0 +1,21 @@
+# default container
+container:
+  image: python:3.8
+
+format_task:
+  auto_cancellation: true
+  name: Black Formatting
+  install_script:
+    - python -m pip install --upgrade pip
+    - pip install black
+  test_script:
+    - black --check .
+
+lint_task:
+  auto_cancellation: true
+  name: Flake8 Linting
+  install_script:
+    - python -m pip install --upgrade pip
+    - pip install flake8
+  test_script:
+    - flake8 workflow_sandbox
