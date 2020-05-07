@@ -11,7 +11,7 @@ jobs:
     name: Release
     runs-on: ubuntu-latest
     env:
-      version: ${${{ github.ref }}//v}
+      VERSION: ${${{ github.ref }}//v}
     if: github.repository == 'rpanderson/workflow-sandbox'
     steps:
       - name: Checkout
@@ -21,8 +21,9 @@ jobs:
         with:
           python-version: 3.8
       - name: Build Distribution
+        env:
+          SCM_LOCAL_VERSION: no-local-version
         run: |
-          touch no-local-version
           python -m pip install --upgrade pip setuptools wheel
           python setup.py sdist bdist_wheel
       - name: Publish on TestPyPI
@@ -40,7 +41,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.ref }}
-          release_name: ${{ env.version }}
+          release_name: ${{ env.VERSION }}
           draft: true
           prerelease: ${{ contains(github.ref, 'rc') }}
       - name: Upload Release Asset
@@ -50,8 +51,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./dist/workflow-sandbox-${{ env.version }}.tar.gz
-          asset_name: workflow-sandbox-${{ env.version }}.tar.gz
+          asset_path: ./dist/workflow-sandbox-${{ env.VERSION }}.tar.gz
+          asset_name: workflow-sandbox-${{ env.VERSION }}.tar.gz
           asset_content_type: application/gzip
       - name: Publish on PyPI
         if: startsWith(github.event.ref, 'refs/tags') && startsWith(github.ref, 'v')
