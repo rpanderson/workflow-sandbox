@@ -5,6 +5,7 @@ on:
       # Only build releases for master and release branches
       - master
       - release*
+  create:
     tags:
       - 'v*'
 
@@ -14,16 +15,19 @@ jobs:
     if: github.repository == 'rpanderson/workflow-sandbox'
     steps:
       - run: |
-          echo ${{ github.ref }}
-          echo ${{ github.event }}
-          echo ${{ github.event.ref }}
-          echo ${{ github.event.ref_type }}
-          echo ${{ github.actor }}
+          echo github.ref: ${{ github.ref }}
+          echo github.event_name: ${{ github.event_name }}
+          echo github.event: ${{ github.event }}
+          echo github.event.name: ${{ github.event.name }}
+          echo github.event.ref: ${{ github.event.ref }}
+          echo github.event.ref_type: ${{ github.event.ref_type }}
+          echo github.event.master_branch: ${{ github.event.master_branch }}
+          echo github.actor: ${{ github.actor }}
   release:
     name: Release
     runs-on: ubuntu-latest
     env:
-      VERSION: ${${{ github.ref }}//v}
+      VERSION: ${${{ github.event.ref }}//v}
     if: github.repository == 'rpanderson/workflow-sandbox'
     steps:
       - name: Checkout
@@ -51,18 +55,18 @@ jobs:
           repository_url: https://test.pypi.org/legacy/
       # Only publish tagged merges elsewhere
       - name: Create GitHub Release
-        if: startsWith(github.event.ref, 'refs/tags') && startsWith(github.ref, 'v')
+        if: github.event.ref_type == 'tag'
         id: create_release
         uses: actions/create-release@latest
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref }}
-          release_name: ${{ env.VERSION }}
+          tag_name: ${{ github.event.ref }}
+          release_name: workflow-sandbox ${{ env.VERSION }}
           draft: true
           prerelease: ${{ contains(github.ref, 'rc') }}
       - name: Upload Release Asset
-        if: startsWith(github.event.ref, 'refs/tags') && startsWith(github.ref, 'v')
+        if: github.event.ref_type == 'tag'
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -72,7 +76,7 @@ jobs:
           asset_name: workflow-sandbox-${{ env.VERSION }}.tar.gz
           asset_content_type: application/gzip
       - name: Publish on PyPI
-        if: startsWith(github.event.ref, 'refs/tags') && startsWith(github.ref, 'v')
+        if: github.event.ref_type == 'tag'
         uses: pypa/gh-action-pypi-publish@master
         with:
           user: __token__
