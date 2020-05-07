@@ -7,7 +7,7 @@ This will be a Python package on test PyPI in its own right, with package name `
 
 This repository was created on GitHub using the following settings.
 
-![alt text](docs/source/img/create_repository.png "GitHub Create a new repository settings")
+![GitHub Create a new repository settings](https://raw.githubusercontent.com/rpanderson/workflow-sandbox/master/docs/source/img/create_repository.png)
 
 ## Development environment
 
@@ -48,15 +48,33 @@ The first port of call will be to test:
 - Create release using `actions/create_release`:
 :
 ```yaml
-    tag_name: ${{ github.ref }}
-    release_name: ${{ env.tag }}
-    body: ${{ steps.release_notes.outputs.contents }}
-    prerelease: ${{ contains(github.ref, 'rc') }}
+jobs:
+  release:
+    name: Release
+    env:
+      VERSION: ${${{ github.ref }}//v}
+    ...
+    steps:
+      ...
+      # Only publish tagged merges elsewhere
+      - name: Create GitHub Release
+        if: startsWith(github.event.ref, 'refs/tags') && startsWith(github.ref, 'v')
+        id: create_release
+        uses: actions/create-release@latest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: ${{ env.VERSION }}
+          draft: true
+          prerelease: ${{ contains(github.ref, 'rc') }}
 ```
 
-- Publish release on GitHub using `actions/upload-release-asset` with the `body` above extracted from the appropriate release notes based on git tags as per [napari/napari#1138](https://github.com/napari/napari/pull/1138).
+- Publish release on GitHub using `actions/upload-release-asset` with the `body` above extracted from the appropriate release notes based on git tags, similar to [napari/napari#1138](https://github.com/napari/napari/pull/1138).
 
-- Publish on PyPI using `pypa/gh-action-pypi-publish`.
+- Using `pypa/gh-action-pypi-publish`:
+  - Publish releases (and release candidates) on PyPI.
+  - Publish merges into `master` branch (including untagged development versions) to TestPyPI with an appropriate `dev` version suffix.
 
 ### Acknowledgements
 
