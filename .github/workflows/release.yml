@@ -15,7 +15,10 @@ jobs:
     if: github.repository == 'rpanderson/workflow-sandbox'
     steps:
       - name: Checkout
-        uses: actions/checkout@master
+        uses: actions/checkout@v2
+      - name: Unshallow
+        run: |
+          git fetch --prune --unshallow
       - name: Install Python
         uses: actions/setup-python@v1
         with:
