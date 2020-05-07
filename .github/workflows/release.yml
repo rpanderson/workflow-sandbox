@@ -5,6 +5,8 @@ on:
       # Only build releases for master and release branches
       - master
       - release*
+    tags:
+      - 'v*'
 
 jobs:
   release:
