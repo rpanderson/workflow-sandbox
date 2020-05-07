@@ -16,9 +16,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Fetch tags
+      - name: Unshallow
         run: |
-          git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+          git fetch --prune --unshallow
       - name: Install Python
         uses: actions/setup-python@v1
         with:
