@@ -19,6 +19,8 @@ jobs:
       - name: Unshallow
         run: |
           git fetch --prune --unshallow
+          git describe --tags
+          git log -1
       - name: Install Python
         uses: actions/setup-python@v1
         with:
