@@ -9,11 +9,12 @@ on:
       - 'v[0-9]+.[0-9]+.[0-9]+*'
 
 jobs:
-  debug:
+  github_properties:
     name: GitHub Properties
     runs-on: ubuntu-latest
     steps:
-      - run: |
+      - name: Enumerate properties
+        run: |
           echo github.ref: ${{ github.ref }}
           echo github.event_name: ${{ github.event_name }}
           echo github.event: ${{ github.event }}
@@ -22,9 +23,13 @@ jobs:
           echo github.event.ref_type: ${{ github.event.ref_type }}
           echo github.event.master_branch: ${{ github.event.master_branch }}
           echo github.actor: ${{ github.actor }}
+      - name: Ignore branch creation
+        if: github.event_name == 'create' && github.event.ref_type == 'branch'
+        run: exit 1
   release:
     name: Release
     runs-on: ubuntu-latest
+    needs: github_properties
     if: github.repository == 'rpanderson/workflow-sandbox'
     steps:
       - name: Checkout
