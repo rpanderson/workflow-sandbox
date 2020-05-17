@@ -34,6 +34,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Unshallow
+        if: github.event.ref_type == 'branch'
         run: |
           git fetch --prune --unshallow
           git describe --tags
