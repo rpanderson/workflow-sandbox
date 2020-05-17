@@ -14,13 +14,13 @@ This will be a (dummy) Python package on test PyPI in its own right, with packag
 
 - This dummy project *loosely* adopts the [release flow](https://releaseflow.org) branching model/strategy. (Loosley as I'm not going to always use feature branches.)
 - Versioning is introspected using the excellent [`setuptools_scm`](https://github.com/pypa/setuptools_scm), using the `release-branch-semver` [version scheme](https://github.com/pypa/setuptools_scm#version-number-construction).
-- When a release candidate was identified (a574270, C below):
+- When a release candidate was identified ([a574270](https://github.com/rpanderson/workflow-sandbox/commit/a5742702fcf6530da3080ad1d4a3eabb4fd78013), C below):
   * A new branch `maintenance/0.2.x` was created, to service the minor release `0.2`.
   * The commit was tagged `v0.2.0rc1`, the first release candidate of this version.
   * Subsequent untagged commits are versioned (with local scheme `no-local-version`): 
-  * On `master` as `0.3.0devN`, e.g. `0.3.0dev1` (ee03672fa0cdf96f4e400586a1629d0e3908a48e, E below);
-  * On `maintenance/0.2.x` as `0.2.0rc2.dev1` (6006a6f5ca5922d9b4f352c2a37f23008eb4d597, D below).
-* In this example, the release candidate was deemed satisfactory and a dummy commit was used to create 6006a6f5ca5922d9b4f352c2a37f23008eb4d597 (F below) so that it could be uniquely tagged as `v0.2.0`.
+  * On `master` as `0.3.0devN`, e.g. `0.3.0dev1` ([ee03672](https://github.com/rpanderson/workflow-sandbox/commit/ee03672fa0cdf96f4e400586a1629d0e3908a48e), E below);
+  * On `maintenance/0.2.x` as `0.2.0rc2.dev1` ([6006a6f](https://github.com/rpanderson/workflow-sandbox/commit/6006a6f5ca5922d9b4f352c2a37f23008eb4d597), D below).
+* In this example, the release candidate was deemed satisfactory and a dummy commit was used to create [6006a6f](https://github.com/rpanderson/workflow-sandbox/commit/6006a6f5ca5922d9b4f352c2a37f23008eb4d597) (F below) so that it could be uniquely tagged as `v0.2.0`.
 
 In pictures, this looks like:
 ```
