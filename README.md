@@ -40,11 +40,13 @@ Actual releases, e.g. `0.2.0` and bugfix releases `0.2.1`, `0.2.2`, etc. will be
 ### GitHub Actions
 
 - [x] Create release using `actions/create_release`.
-- [ ] Publish release on GitHub using `actions/upload-release-asset` with the `body` above extracted from the appropriate release notes based on git tags (see [#14](https://github.com/rpanderson/workflow-sandbox/issues/14)).
+- [x] Publish release on GitHub using `actions/upload-release-asset`...
+- [ ] ... with the `body` above extracted from the appropriate release notes based on git tags (see [#14](https://github.com/rpanderson/workflow-sandbox/issues/14)).
 - [x] Using `pypa/gh-action-pypi-publish`:
   - All tagged releases (including candidates) are published on PyPI and TestPyPI automatically.
   - All untagged pushes to `master` and `maintenance/*` branches are published on TestPyPI automatically with an appropriate `dev` version suffix.
 - [x] Investigate triggering off creation vs branch push events (see [#8](https://github.com/rpanderson/workflow-sandbox/issues/8)).
+- [ ] Build multiple wheels using a branching workflow `actions/[up/down]load-artifact` (see e.g. [chrisjbillington/desktop-app#7](https://github.com/chrisjbillington/desktop-app/issues/7])) and/or [manylinux](https://github.com/pypa/manylinux) (GitHub Action [RalfG/python-wheels-manylinux-build](https://github.com/RalfG/python-wheels-manylinux-build)).
 - [ ] Automated documentation build and push to `gh-pages` branch.
 
 ### CirrusCI
