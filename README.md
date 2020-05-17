@@ -31,7 +31,7 @@ B -- C---E [master]
 [v0.2.0rc1]
 ```
 
-*Update:* See #13 for a discussion of why this was necessary and a better alternative (tag C/D with both v0.2.0rc1 and v0.2.0).
+*Update:* See [#13](https://github.com/rpanderson/workflow-sandbox/issues/13) for a discussion of why this was necessary and a better alternative (tag C/D with both v0.2.0rc1 and v0.2.0).
 
 Actual releases, e.g. `0.2.0` and bugfix releases `0.2.1`, `0.2.2`, etc. will be tagged on `maintenance/0.2.x` alone. This branch will contain no development, but cherry pick bug-fixes from master.
 
@@ -40,11 +40,11 @@ Actual releases, e.g. `0.2.0` and bugfix releases `0.2.1`, `0.2.2`, etc. will be
 ### GitHub Actions
 
 - [x] Create release using `actions/create_release`.
-- [ ] Publish release on GitHub using `actions/upload-release-asset` with the `body` above extracted from the appropriate release notes based on git tags, similar to [napari/napari#1138](https://github.com/napari/napari/pull/1138).
+- [ ] Publish release on GitHub using `actions/upload-release-asset` with the `body` above extracted from the appropriate release notes based on git tags (see [#14](https://github.com/rpanderson/workflow-sandbox/issues/14)).
 - [x] Using `pypa/gh-action-pypi-publish`:
   - All tagged releases (including candidates) are published on PyPI and TestPyPI automatically.
   - All untagged pushes to `master` and `maintenance/*` branches are published on TestPyPI automatically with an appropriate `dev` version suffix.
-- [x] Investigate triggering off creation vs branch push events (see rpanderson/workflow-sandbox#8).
+- [x] Investigate triggering off creation vs branch push events (see [#8](https://github.com/rpanderson/workflow-sandbox/issues/8)).
 - [ ] Automated documentation build and push to `gh-pages` branch.
 
 ### CirrusCI
