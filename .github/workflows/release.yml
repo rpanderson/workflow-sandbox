@@ -27,6 +27,8 @@ jobs:
             architecture: 'x64'
     env:
       PACKAGE_NAME: workflow-sandbox
+      SCM_VERSION_SCHEME: release-branch-semver
+      SCM_LOCAL_SCHEME: no-local-version
     if: github.repository == 'rpanderson/workflow-sandbox' && (github.event_name != 'create' || github.event.ref_type != 'branch')
     steps:
       - name: Checkout
@@ -42,9 +44,6 @@ jobs:
           python-version: ${{ matrix.python }}
           architecture: ${{ matrix.architecture }}
       - name: Built Distribution
-        env:
-          SCM_VERSION_SCHEME: release-branch-semver
-          SCM_LOCAL_SCHEME: no-local-version
         run: |
           python -m pip install --upgrade pip setuptools wheel
           pip install -U git+https://github.com/pypa/setuptools_scm.git@8e6aa2b5fd42cb257c86e6dbe720eaee6d1e2c9b
