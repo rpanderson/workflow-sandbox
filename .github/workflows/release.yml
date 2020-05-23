@@ -116,7 +116,7 @@ jobs:
           source .miniconda/etc/profile.d/conda.sh
           conda activate
           conda create -n py${{ matrix.python }} python=${{ matrix.python }}
-        
+
       - name: Build Conda Package
         run: |
           source .miniconda/etc/profile.d/conda.sh
@@ -252,7 +252,7 @@ jobs:
             --user $ANACONDA_USER \
             --label test \
             conda_packages/*/*
-              
+
       - name: Publish to Anaconda main label
         if: github.event.ref_type == 'tag'
         run: |
