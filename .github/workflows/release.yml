@@ -3,8 +3,9 @@ name: Build and Release
 on:
   push:
     branches:
-      - master
-      - maintenance/*
+      - get-setup-requires
+      # - master
+      # - maintenance/*
   create:
     tags:
       - 'v[0-9]+.[0-9]+.[0-9]+*'
@@ -20,13 +21,13 @@ env:
   ANACONDA_USER: rpanderson
 
   # Configuration for a package with compiled extensions:
-  # PURE: false
-  # NOARCH: false
+  PURE: false
+  NOARCH: false
 
   # Configuration for a package with no extensions, but with dependencies that differ by
   # platform or Python version:
-  PURE: true
-  NOARCH: false
+  # PURE: true
+  # NOARCH: false
 
   # Configuration for a package with no extensions and the same dependencies on all
   # platforms and Python versions. For this configuration you should comment out all but
@@ -34,6 +35,18 @@ env:
   # needed.
   # PURE: true
   # NOARCH: true
+
+  STEP_GET_BUILD_REQUIREMENTS: |
+    SETUP_REQUIRES=$(python -c '\
+    import configparser as p
+    c = p.ConfigParser(inline_comment_prefixes=";")
+    c.read("setup.cfg")
+    requirements = c.get("options", "setup_requires").splitlines()
+    if "setuptools_scm" in requirements: # Just until we stop using the git version
+        requirements.remove("setuptools_scm")
+    print(*[s.replace(" ", "") for s in requirements if s])')
+    echo "::set-env name=SETUP_REQUIRES::$SETUP_REQUIRES"
+
 
 jobs:
   build:
@@ -75,9 +88,15 @@ jobs:
           python-version: ${{ matrix.python }}
           architecture: ${{ matrix.arch }}
 
+      - name: Get Build Requirements
+        run: ${{ env.STEP_GET_BUILD_REQUIREMENTS }}
+
       - name: Install Build Tools
         run: |
           python -m pip install --upgrade pip setuptools wheel
+          if [ ! -z "$SETUP_REQUIRES" ]; then
+            pip install $SETUP_REQUIRES
+          fi
           pip install -U git+https://github.com/pypa/setuptools_scm.git@8e6aa2b5
 
       - name: Source Distribution
@@ -122,6 +141,9 @@ jobs:
           source .miniconda/etc/profile.d/conda.sh
           conda activate py${{ matrix.python }}
           conda install -c cbillington setuptools_conda
+          if [ ! -z "$SETUP_REQUIRES" ]; then
+            conda install $SETUP_REQUIRES
+          fi
           pip install -U git+https://github.com/pypa/setuptools_scm.git@8e6aa2b5
           if [ $NOARCH == true ]; then
               python setup.py dist_conda --noarch
@@ -158,12 +180,19 @@ jobs:
           git fetch --prune --unshallow
           git tag -d $(git tag --points-at HEAD)
 
+      - name: Install Python
+        uses: actions/setup-python@v2
+
+      - name: Get Build Requirements
+        run: ${{ env.STEP_GET_BUILD_REQUIREMENTS }}
+
       - name: Build Manylinux Wheels
         if: env.PURE == 'false'
         uses: RalfG/python-wheels-manylinux-build@v0.2.2-manylinux2010_x86_64
         with:
           python-versions: ${{ matrix.python }}
-          build-requirements: git+https://github.com/pypa/setuptools_scm.git@8e6aa2b5
+          build-requirements: git+https://github.com/pypa/setuptools_scm.git@8e6aa2b5 ${{ env.SETUP_REQUIRES }}
+          pip-wheel-args: '--no-deps --no-build-isolation'
 
       - name: Upload Artifact
         if: env.PURE == 'false'
@@ -190,12 +219,12 @@ jobs:
           name: conda_packages
           path: ./conda_packages
 
-      - name: Publish on TestPyPI
-        uses: pypa/gh-action-pypi-publish@master
-        with:
-          user: __token__
-          password: ${{ secrets.testpypi }}
-          repository_url: https://test.pypi.org/legacy/
+      # - name: Publish on TestPyPI
+      #   uses: pypa/gh-action-pypi-publish@master
+      #   with:
+      #     user: __token__
+      #     password: ${{ secrets.testpypi }}
+      #     repository_url: https://test.pypi.org/legacy/
 
       - name: Get Version Number
         if: github.event.ref_type == 'tag'
@@ -241,17 +270,17 @@ jobs:
           conda activate
           conda install anaconda-client
 
-      - name: Publish to Anaconda test label
-        if: github.event.ref_type != 'tag'
-        run: |
-          source .miniconda/etc/profile.d/conda.sh
-          conda activate
-          anaconda \
-            --token ${{ secrets.ANACONDA_API_TOKEN }} \
-            upload \
-            --user $ANACONDA_USER \
-            --label test \
-            conda_packages/*/*
+      # - name: Publish to Anaconda test label
+      #   if: github.event.ref_type != 'tag'
+      #   run: |
+      #     source .miniconda/etc/profile.d/conda.sh
+      #     conda activate
+      #     anaconda \
+      #       --token ${{ secrets.ANACONDA_API_TOKEN }} \
+      #       upload \
+      #       --user $ANACONDA_USER \
+      #       --label test \
+      #       conda_packages/*/*
 
       - name: Publish to Anaconda main label
         if: github.event.ref_type == 'tag'
