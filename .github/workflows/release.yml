@@ -180,9 +180,11 @@ jobs:
           git tag -d $(git tag --points-at HEAD)
 
       - name: Install Python
+        if: env.PURE == 'false'
         uses: actions/setup-python@v2
 
       - name: Get Build Requirements
+        if: env.PURE == 'false'
         run: ${{ env.STEP_GET_BUILD_REQUIREMENTS }}
 
       - name: Build Manylinux Wheels
