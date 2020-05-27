@@ -175,7 +175,6 @@ jobs:
         uses: RalfG/python-wheels-manylinux-build@v0.2.2-manylinux2010_x86_64
         with:
           python-versions: ${{ matrix.python }}
-          build-requirements: git+https://github.com/pypa/setuptools_scm.git@8e6aa2b5
 
       - name: Upload Artifact
         if: env.PURE == 'false'
