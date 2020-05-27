@@ -62,12 +62,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
-      - name: Unshallow
+      - name: Ignore Tags
         if: github.event.ref_type != 'tag'
-        run: |
-          git fetch --prune --unshallow
-          git tag -d $(git tag --points-at HEAD)
+        run: git tag -d $(git tag --points-at HEAD)
 
       - name: Install Python
         uses: actions/setup-python@v2
@@ -163,12 +163,12 @@ jobs:
       - name: Checkout
         if: env.PURE == 'false'
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
-      - name: Unshallow
+      - name: Ignore Tags
         if: github.event.ref_type != 'tag' && env.PURE == 'false'
-        run: |
-          git fetch --prune --unshallow
-          git tag -d $(git tag --points-at HEAD)
+        run: git tag -d $(git tag --points-at HEAD)
 
       - name: Build Manylinux Wheels
         if: env.PURE == 'false'
