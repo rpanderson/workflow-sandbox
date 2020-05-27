@@ -26,6 +26,8 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+conda_build/
+conda_packages/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
