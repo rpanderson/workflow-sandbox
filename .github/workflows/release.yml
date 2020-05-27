@@ -3,8 +3,9 @@ name: Build and Release
 on:
   push:
     branches:
-      - master
-      - maintenance/*
+      - fetch-depth-zero
+      # - master
+      # - maintenance/*
   create:
     tags:
       - 'v[0-9]+.[0-9]+.[0-9]+*'
@@ -62,12 +63,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
-      - name: Unshallow
+      - name: Ignore Tags
         if: github.event.ref_type != 'tag'
-        run: |
-          git fetch --prune --unshallow
-          git tag -d $(git tag --points-at HEAD)
+        run: git tag -d $(git tag --points-at HEAD)
 
       - name: Install Python
         uses: actions/setup-python@v2
@@ -163,12 +164,12 @@ jobs:
       - name: Checkout
         if: env.PURE == 'false'
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
-      - name: Unshallow
+      - name: Ignore Tags
         if: github.event.ref_type != 'tag' && env.PURE == 'false'
-        run: |
-          git fetch --prune --unshallow
-          git tag -d $(git tag --points-at HEAD)
+        run: git tag -d $(git tag --points-at HEAD)
 
       - name: Build Manylinux Wheels
         if: env.PURE == 'false'
@@ -202,12 +203,12 @@ jobs:
           name: conda_packages
           path: ./conda_packages
 
-      - name: Publish on TestPyPI
-        uses: pypa/gh-action-pypi-publish@master
-        with:
-          user: __token__
-          password: ${{ secrets.testpypi }}
-          repository_url: https://test.pypi.org/legacy/
+      # - name: Publish on TestPyPI
+      #   uses: pypa/gh-action-pypi-publish@master
+      #   with:
+      #     user: __token__
+      #     password: ${{ secrets.testpypi }}
+      #     repository_url: https://test.pypi.org/legacy/
 
       - name: Get Version Number
         if: github.event.ref_type == 'tag'
@@ -253,17 +254,17 @@ jobs:
           conda activate
           conda install anaconda-client
 
-      - name: Publish to Anaconda test label
-        if: github.event.ref_type != 'tag'
-        run: |
-          source .miniconda/etc/profile.d/conda.sh
-          conda activate
-          anaconda \
-            --token ${{ secrets.ANACONDA_API_TOKEN }} \
-            upload \
-            --user $ANACONDA_USER \
-            --label test \
-            conda_packages/*/*
+      # - name: Publish to Anaconda test label
+      #   if: github.event.ref_type != 'tag'
+      #   run: |
+      #     source .miniconda/etc/profile.d/conda.sh
+      #     conda activate
+      #     anaconda \
+      #       --token ${{ secrets.ANACONDA_API_TOKEN }} \
+      #       upload \
+      #       --user $ANACONDA_USER \
+      #       --label test \
+      #       conda_packages/*/*
 
       - name: Publish to Anaconda main label
         if: github.event.ref_type == 'tag'
