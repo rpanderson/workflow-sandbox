@@ -59,3 +59,4 @@ Actual releases, e.g. `0.2.0` and bugfix releases `0.2.1`, `0.2.2`, etc. will be
 Much of this is guided by the practices of other development communities, and many helpful conversations with [@chrisjbillington](https://github.com/chrisjbillington) and [@philipstarkey](https://github.com/philipstarkey).
 foo
 bar
+cat
