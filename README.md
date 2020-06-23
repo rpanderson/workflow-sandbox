@@ -6,7 +6,7 @@
 [![PyPI](https://img.shields.io/pypi/v/workflow-sandbox.svg)](https://pypi.org/project/workflow-sandbox)
 [![Python Version](https://img.shields.io/pypi/pyversions/workflow-sandbox.svg)](https://python.org)
 
-Dummy project used to test GitHub actions and Cirrus CI for building and publishing releases of Python packages.
+Dummy project used to test GitHub Actions and Cirrus CI for building and publishing releases of Python packages.
 
 This will be a (dummy) Python package on test PyPI in its own right, with package name `workflow-sandbox` and module name `workflow_sandbox`.
 
