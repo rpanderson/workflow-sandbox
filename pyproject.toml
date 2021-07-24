@@ -1,11 +1,11 @@
 [build-system]
-requires = ["setuptools", "wheel", "setuptools_scm"]
+requires = ["setuptools", "wheel", "setuptools_scm>=4.1.0"]
 build-backend = "setuptools.build_meta"
 
 [tool.black]
 line-length = 88
 skip-string-normalization = true
-target_version = ['py36', 'py37', 'py38']
+target_version = ['py36', 'py37', 'py38', 'py39']
 include = '\.pyi?$'
 exclude = '''
 (

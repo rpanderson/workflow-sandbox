@@ -8,7 +8,7 @@
 
 Dummy project used to test GitHub actions and Cirrus CI for building and publishing releases of Python packages.
 
-This will be a (dummy) Python package on test PyPI in its own right, with package name `workflow-sandbox` and module name `workflow_sandbox`.
+This will be a (dummy) Python package on test PyPI and Anacnoda Cloud in its own right, with package name `workflow-sandbox` and module name `workflow_sandbox`.
 
 ## Practices
 
