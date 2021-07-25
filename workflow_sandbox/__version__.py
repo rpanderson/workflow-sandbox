@@ -3,10 +3,10 @@ from pathlib import Path
 
 try:
     # Standard library in Python 3.8+
-    import importlib.metadata as importlib_metadata
+    from importlib.metadata import version, PackageNotFoundError
 except ImportError:
     # The backport of the Python 3.8 stdlib module
-    import importlib_metadata
+    from importlib_metadata import version, PackageNotFoundError
 
 root = Path(__file__).parent.parent
 if (root / '.git').is_dir():
@@ -22,6 +22,6 @@ else:
     # Get the version at runtime from PEP-0566 metadata using `importlib.metadata`
     # from the standard library or the `importlib_metadata` backport
     try:
-        __version__ = importlib_metadata.version(__package__)
-    except importlib_metadata.PackageNotFoundError:
+        __version__ = version(__package__)
+    except PackageNotFoundError:
         __version__ = None
