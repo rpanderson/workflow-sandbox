@@ -164,7 +164,7 @@ jobs:
 
       - name: Build Manylinux Wheels
         if: env.PURE == 'false'
-        uses: RalfG/python-wheels-manylinux-build@v0.4.0
+        uses: RalfG/python-wheels-manylinux-build@v0.4.2
         with:
           python-versions: ${{ matrix.python }}
 
