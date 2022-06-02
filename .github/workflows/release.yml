@@ -41,25 +41,21 @@ jobs:
           - { os: ubuntu-latest,   python: '3.9',  arch: x64 }
           - { os: ubuntu-latest,   python: '3.8',  arch: x64 }
           - { os: ubuntu-latest,   python: '3.7',  arch: x64 }
-          - { os: ubuntu-latest,   python: '3.6',  arch: x64 }
 
           - { os: macos-latest,    python: '3.10',  arch: x64 }
           - { os: macos-latest,    python: '3.9',  arch: x64 }
           - { os: macos-latest,    python: '3.8',  arch: x64 }
           - { os: macos-latest,    python: '3.7',  arch: x64 }
-          - { os: macos-latest,    python: '3.6',  arch: x64 }
 
           - { os: windows-latest,  python: '3.10',  arch: x64 }
           - { os: windows-latest,  python: '3.9',  arch: x64 }
           - { os: windows-latest,  python: '3.8',  arch: x64 }
           - { os: windows-latest,  python: '3.7',  arch: x64 }
-          - { os: windows-latest,  python: '3.6',  arch: x64 }
 
           - { os: windows-latest,  python: '3.10',  arch: x86 }
           - { os: windows-latest,  python: '3.9',  arch: x86 }
           - { os: windows-latest,  python: '3.8',  arch: x86 }
           - { os: windows-latest,  python: '3.7',  arch: x86 }
-          - { os: windows-latest,  python: '3.6',  arch: x86 }
 
     if: github.repository == 'rpanderson/workflow-sandbox' && (github.event_name != 'create' || github.event.ref_type != 'branch')
     steps:
@@ -149,11 +145,6 @@ jobs:
   manylinux:
     name: Build Manylinux
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include:
-          - { python: 'cp36-cp36m cp37-cp37m cp38-cp38 cp39-cp39 cp310-cp310' }
-
     if: github.repository == 'rpanderson/workflow-sandbox' && (github.event_name != 'create' || github.event.ref_type != 'branch')
     steps:
       - name: Checkout
@@ -170,7 +161,7 @@ jobs:
         if: env.PURE == 'false'
         uses: RalfG/python-wheels-manylinux-build@v0.4.2
         with:
-          python-versions: ${{ matrix.python }}
+          python-versions: 'cp37-cp37m cp38-cp38 cp39-cp39 cp310-cp310'
 
       - name: Upload Artifact
         if: env.PURE == 'false'
