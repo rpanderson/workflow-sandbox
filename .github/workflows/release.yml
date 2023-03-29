@@ -186,13 +186,6 @@ jobs:
           name: conda_packages
           path: ./conda_packages
 
-      - name: Publish on TestPyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          user: __token__
-          password: ${{ secrets.testpypi }}
-          repository-url: https://test.pypi.org/legacy/
-
       - name: Get Version Number
         if: github.event.ref_type == 'tag'
         run: |
@@ -210,6 +203,13 @@ jobs:
           draft: true
           prerelease: ${{ contains(github.event.ref, 'rc') }}
           files: ./dist/${{ env.PACKAGE_NAME }}-${{ env.VERSION }}.tar.gz
+
+      - name: Publish on TestPyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.testpypi }}
+          repository-url: https://test.pypi.org/legacy/
 
       - name: Publish on PyPI
         if: github.event.ref_type == 'tag'
