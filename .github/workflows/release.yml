@@ -42,10 +42,10 @@ jobs:
           - { os: ubuntu-latest,   python: '3.8',  arch: x64 }
           - { os: ubuntu-latest,   python: '3.7',  arch: x64 }
 
-          - { os: macos-latest,    python: '3.10',  arch: x64 }
-          - { os: macos-latest,    python: '3.9',  arch: x64 }
-          - { os: macos-latest,    python: '3.8',  arch: x64 }
-          - { os: macos-latest,    python: '3.7',  arch: x64 }
+          - { os: macos-10.15,    python: '3.10',  arch: x64 }
+          - { os: macos-10.15,    python: '3.9',  arch: x64 }
+          - { os: macos-10.15,    python: '3.8',  arch: x64 }
+          - { os: macos-10.15,    python: '3.7',  arch: x64 }
 
           - { os: windows-latest,  python: '3.10',  arch: x64 }
           - { os: windows-latest,  python: '3.9',  arch: x64 }
@@ -105,10 +105,7 @@ jobs:
           echo "CONDA_BUILD_ARGS=$CONDA_BUILD_ARGS" >> $GITHUB_ENV
 
       - name: Install Miniconda
-        # We need https://github.com/conda-incubator/setup-miniconda/pull/189 in order
-        # to be able to install 32-bit miniconda on Windows. Once setup-miniconda 2.1.2
-        # is released with this fix, can change to @v2.
-        uses: conda-incubator/setup-miniconda@1a875d105ac03256664b54c882c8c374ce617ef6
+        uses: conda-incubator/setup-miniconda@v2
         with:
           auto-update-conda: true
           python-version: ${{ matrix.python }}
@@ -189,45 +186,34 @@ jobs:
           name: conda_packages
           path: ./conda_packages
 
-      - name: Publish on TestPyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          user: __token__
-          password: ${{ secrets.testpypi }}
-          repository_url: https://test.pypi.org/legacy/
-
       - name: Get Version Number
         if: github.event.ref_type == 'tag'
         run: |
           VERSION="${GITHUB_REF/refs\/tags\/v/}"
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
-      - name: Create GitHub Release
+      - name: Create GitHub Release and Upload Release Asset
         if: github.event.ref_type == 'tag'
-        id: create_release
-        uses: actions/create-release@latest
+        uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.event.ref }}
-          release_name: ${{ env.PACKAGE_NAME }} ${{ env.VERSION }}
+          name: ${{ env.PACKAGE_NAME }} ${{ env.VERSION }}
           draft: true
           prerelease: ${{ contains(github.event.ref, 'rc') }}
+          files: ./dist/${{ env.PACKAGE_NAME }}-${{ env.VERSION }}.tar.gz
 
-      - name: Upload Release Asset
-        if: github.event.ref_type == 'tag'
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish on TestPyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./dist/${{ env.PACKAGE_NAME }}-${{ env.VERSION }}.tar.gz
-          asset_name: ${{ env.PACKAGE_NAME }}-${{ env.VERSION }}.tar.gz
-          asset_content_type: application/gzip
+          user: __token__
+          password: ${{ secrets.testpypi }}
+          repository-url: https://test.pypi.org/legacy/
 
       - name: Publish on PyPI
         if: github.event.ref_type == 'tag'
-        uses: pypa/gh-action-pypi-publish@master
+        uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
           password: ${{ secrets.pypi }}
