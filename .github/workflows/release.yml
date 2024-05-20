@@ -93,9 +93,9 @@ jobs:
 
       - name: Upload Artifact
         if: strategy.job-index == 0 || (env.PURE == 'false' && runner.os != 'Linux')
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: dist
+          name: dist-${{ matrix.os }}-py${{ matrix.python }}-${{ matrix.arch }}
           path: ./dist
 
       - name: Set Variables for Conda Build
@@ -140,9 +140,9 @@ jobs:
 
       - name: Upload Artifact
         if: matrix.conda
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: conda_packages
+          name: conda_packages-${{ matrix.os }}-py${{ matrix.python }}-${{ matrix.arch }}
           path: ./conda_packages
 
 
@@ -170,9 +170,9 @@ jobs:
 
       - name: Upload Artifact
         if: env.PURE == 'false'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: dist
+          name: dist-manylinux
           path: dist/*manylinux*.whl
 
   release:
@@ -182,16 +182,18 @@ jobs:
     steps:
 
       - name: Download Artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          name: dist
+          pattern: dist*
           path: ./dist
+          merge-multiple: true
 
       - name: Download Artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          name: conda_packages
+          pattern: conda_packages-*
           path: ./conda_packages
+          merge-multiple: true
 
       - name: Get Version Number
         if: github.event.ref_type == 'tag'
