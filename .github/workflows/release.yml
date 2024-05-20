@@ -5,7 +5,6 @@ on:
     branches:
       - master
       - maintenance/*
-  create:
     tags:
       - 'v[0-9]+.[0-9]+.[0-9]+*'
 
@@ -66,7 +65,7 @@ jobs:
           - { os: windows-latest,  python: '3.8',  arch: x86, conda: true }
           - { os: windows-latest,  python: '3.7',  arch: x86, conda: true }
 
-    if: github.repository == 'rpanderson/workflow-sandbox' && (github.event_name != 'create' || github.event.ref_type != 'branch')
+    if: github.repository == 'rpanderson/workflow-sandbox'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -74,7 +73,7 @@ jobs:
           fetch-depth: 0
 
       - name: Ignore Tags
-        if: github.event.ref_type != 'tag'
+        if: github.event.ref_type == 'push' && contains(github.ref, '/tags')
         run: git tag -d $(git tag --points-at HEAD)
 
       - name: Install Python
@@ -154,7 +153,7 @@ jobs:
   manylinux:
     name: Build Manylinux
     runs-on: ubuntu-latest
-    if: github.repository == 'rpanderson/workflow-sandbox' && (github.event_name != 'create' || github.event.ref_type != 'branch')
+    if: github.repository == 'rpanderson/workflow-sandbox'
     steps:
       - name: Checkout
         if: env.PURE == 'false'
@@ -163,7 +162,7 @@ jobs:
           fetch-depth: 0
 
       - name: Ignore Tags
-        if: github.event.ref_type != 'tag' && env.PURE == 'false'
+        if: contains(github.ref, '/tags') && env.PURE == 'false'
         run: git tag -d $(git tag --points-at HEAD)
 
       - name: Build Manylinux Wheels
@@ -201,13 +200,13 @@ jobs:
           merge-multiple: true
 
       - name: Get Version Number
-        if: github.event.ref_type == 'tag'
+        if: contains(github.ref, '/tags')
         run: |
           VERSION="${GITHUB_REF/refs\/tags\/v/}"
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Create GitHub Release and Upload Release Asset
-        if: github.event.ref_type == 'tag'
+        if: contains(github.ref, '/tags')
         uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -226,7 +225,7 @@ jobs:
           repository-url: https://test.pypi.org/legacy/
 
       - name: Publish on PyPI
-        if: github.event.ref_type == 'tag'
+        if: contains(github.ref, '/tags')
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
@@ -242,7 +241,7 @@ jobs:
         run: conda install anaconda-client
 
       - name: Publish to Anaconda test label
-        if: github.event.ref_type != 'tag'
+        if: contains(github.ref, '/tags')
         shell: bash -l {0}
         run: |
           anaconda \
@@ -254,7 +253,7 @@ jobs:
 
       - name: Publish to Anaconda main label
         shell: bash -l {0}
-        if: github.event.ref_type == 'tag'
+        if: contains(github.ref, '/tags')
         run: |
           anaconda \
             --token ${{ secrets.ANACONDA_API_TOKEN }} \
