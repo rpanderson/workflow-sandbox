@@ -158,8 +158,8 @@ jobs:
 
   build:
     name: Build
-    needs: configure
     runs-on: ${{ matrix.os }}
+    needs: configure
     strategy:
       matrix:
         os: ${{ fromJSON(needs.configure.outputs.BUILD_OS_LIST) }}
@@ -231,18 +231,15 @@ jobs:
           path: ./conda_packages
           if-no-files-found: error
 
-  release:
-    name: Release
+
+  github-release:
+    name: Publish release (GitHub)
     runs-on: ubuntu-latest
     needs: [configure, build]
+    if: ${{ needs.configure.outputs.RELEASE == 'true' }}
     env:
       PKGNAME: ${{ needs.configure.outputs.PKGNAME }}
       PKGVER: ${{ needs.configure.outputs.PKGVER }}
-      RELEASE: ${{ needs.configure.outputs.RELEASE }}
-      TESTPYPI_UPLOAD: ${{ needs.configure.outputs.TESTPYPI_UPLOAD }}
-      PYPI_UPLOAD: ${{ needs.configure.outputs.PYPI_UPLOAD }}
-      TEST_ANACONDA_UPLOAD: ${{ needs.configure.outputs.TEST_ANACONDA_UPLOAD }}
-      ANACONDA_UPLOAD: ${{ needs.configure.outputs.ANACONDA_UPLOAD }}
 
     steps:
       - name: Download Artifact
@@ -252,15 +249,7 @@ jobs:
           path: ./dist
           merge-multiple: true
 
-      - name: Download Artifact
-        uses: actions/download-artifact@v4
-        with:
-          pattern: conda_packages-*
-          path: ./conda_packages
-          merge-multiple: true
-
-      - name: Create GitHub Release and Upload Release Asset
-        if: env.RELEASE == 'true'
+      - name: Create GitHub release and upload release asset
         uses: softprops/action-gh-release@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -271,20 +260,63 @@ jobs:
           prerelease: ${{ contains(github.event.ref, 'rc') }}
           files: ./dist/${{ env.PKGNAME }}-${{ env.PKGVER }}.tar.gz
 
+
+  testpypi-upload:
+    name: Publish on Test PyPI
+    runs-on: ubuntu-latest
+    needs: [configure, build]
+    if: ${{ needs.configure.outputs.TESTPYPI_UPLOAD == 'true' }}
+
+    steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          pattern: dist*
+          path: ./dist
+          merge-multiple: true
+
       - name: Publish on TestPyPI
-        if: env.TESTPYPI_UPLOAD == 'true'
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
           password: ${{ secrets.TESTPYPI }}
           repository-url: https://test.pypi.org/legacy/
 
+
+  pypi-upload:
+    name: Publish on PyPI
+    runs-on: ubuntu-latest
+    needs: [configure, build]
+    if: ${{ needs.configure.outputs.PYPI_UPLOAD == 'true' }}
+
+    steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          pattern: dist*
+          path: ./dist
+          merge-multiple: true
+
       - name: Publish on PyPI
-        if: env.PYPI_UPLOAD == 'true'
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
           password: ${{ secrets.PYPI }}
+
+
+  test-anaconda-upload:
+    name: Publish on Anaconda (test label)
+    runs-on: ubuntu-latest
+    needs: [configure, build]
+    if: ${{ needs.configure.outputs.TEST_ANACONDA_UPLOAD == 'true' }}
+
+    steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          pattern: conda_packages-*
+          path: ./conda_packages
+          merge-multiple: true
 
       - name: Install Miniforge
         uses: conda-incubator/setup-miniconda@v3
@@ -300,7 +332,6 @@ jobs:
         run: conda install anaconda-client
 
       - name: Publish to Anaconda test label
-        if: env.TEST_ANACONDA_UPLOAD == 'true'
         shell: bash -l {0}
         run: |
           anaconda \
@@ -311,8 +342,35 @@ jobs:
             --label test \
             conda_packages/*/*
 
-      - name: Publish to Anaconda main label
-        if: env.ANACONDA_UPLOAD == 'true'
+
+  anaconda-upload:
+    name: Publish on Anaconda
+    runs-on: ubuntu-latest
+    needs: [configure, build]
+    if: ${{ needs.configure.outputs.ANACONDA_UPLOAD == 'true' }}
+
+    steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          pattern: conda_packages-*
+          path: ./conda_packages
+          merge-multiple: true
+
+      - name: Install Miniforge
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          miniforge-version: "latest"
+          auto-update-conda: true
+          conda-remove-defaults: true
+          auto-activate-base: true
+          activate-environment: ""
+
+      - name: Install Anaconda cloud client
+        shell: bash -l {0}
+        run: conda install anaconda-client
+
+      - name: Publish to Anaconda main
         shell: bash -l {0}
         run: |
           anaconda \
