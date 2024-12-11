@@ -342,6 +342,8 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           repository-url: https://test.pypi.org/legacy/
+          verbose: true
+          skip-existing: true
 
 
   pypi-upload:
@@ -368,6 +370,9 @@ jobs:
 
       - name: Publish on PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          verbose: true
+          skip-existing: true
 
 
   test-anaconda-upload:
