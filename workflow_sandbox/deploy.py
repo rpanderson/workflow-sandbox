@@ -5,7 +5,7 @@ from pathlib import Path
 WORKFLOW_SRC = Path('../.github/workflows/release.yml').read_text(encoding='utf8')
 HEAD = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode().strip()
 
-def deploy(repo_slug, mainbranch='master', commit_to_mainbranch=False):
+def deploy(repo_slug, mainbranch='master', commit_to_mainbranch=False, dry_run=False):
     """Deploy latest workflow to a repo:
     * Clone given repo to a temporary directory
     * Checkout the main branch
@@ -15,6 +15,7 @@ def deploy(repo_slug, mainbranch='master', commit_to_mainbranch=False):
     * Copy release.yml from workflow-sandbox to the repo
     * Add it
     * Commit
+    * if dry_run is True, print the diff to the terminal and return, otherwise:
     * Push
     * if commit_to_mainbranch is False, return a URL for creating a pull request, else
       return None
@@ -41,6 +42,12 @@ def deploy(repo_slug, mainbranch='master', commit_to_mainbranch=False):
             return
         commit_msg = f"sync workflow with rpanderson/workflow-sandbox@{HEAD}"
         subprocess.check_call(['git', 'commit', '-m', commit_msg], cwd=repo)
+        if dry_run:
+            print(f"\n\nChanges that would be made for {repo_slug}")
+            print("=" * 80)
+            subprocess.check_call(['git', '--no-pager', 'diff', 'HEAD^'], cwd=repo)
+            print("=" * 80 + '\n\n')
+            return
         if commit_to_mainbranch:
             subprocess.check_call(['git', 'push'], cwd=repo)
         else:
@@ -52,6 +59,9 @@ if __name__ == '__main__':
     # If true, workflows updated directly in main branch and pushed. Otherwise, a new
     # branch is created and pushed.
     COMMIT_TO_MAINBRANCH = False
+
+    # Don't push, just print diffs
+    DRY_RUN = True
 
     REPOS = [
         'labscript-suite/labscript',
@@ -77,11 +87,13 @@ if __name__ == '__main__':
 
     pr_urls = []
     for repo in REPOS:
-        url = deploy(repo, commit_to_mainbranch=COMMIT_TO_MAINBRANCH)
+        url = deploy(repo, commit_to_mainbranch=COMMIT_TO_MAINBRANCH, dry_run=DRY_RUN)
         if url is not None:
             pr_urls.append(url)
 
-    # Print a URL for each repo to create a pull request with the newly-created branch
-    print("URLs to create PRs:")
-    for url in pr_urls:
-        print(url)
+    if pr_urls:
+        # Print a URL for each repo to create a pull request with the newly-created
+        # branch, if any:
+        print("URLs to create PRs:")
+        for url in pr_urls:
+            print(url)
