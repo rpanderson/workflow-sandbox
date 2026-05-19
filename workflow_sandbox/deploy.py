@@ -25,6 +25,12 @@ def deploy(repo_slug, mainbranch='master', commit_to_mainbranch=False, dry_run=F
     with tempfile.TemporaryDirectory() as tempdir:
         subprocess.check_call(['git', 'clone', url], cwd=tempdir)
         repo = Path(tempdir) / project_name
+
+        # Disable asynchronous git housekeeping that can cause a race when cleaning up
+        # the temporary directory
+        subprocess.check_call(['git', 'config', 'gc.auto', '0'], cwd=repo)
+        subprocess.check_call(['git', 'config', 'maintenance.auto', 'false'], cwd=repo)
+
         workflow_path = Path(repo) / '.github' / 'workflows' / 'release.yml'
         workflow_config_path = Path(repo) / '.github' / 'workflows' / 'release-vars.sh'
         if not workflow_config_path.exists() or not workflow_path.exists():
