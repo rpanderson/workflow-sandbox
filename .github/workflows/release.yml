@@ -259,7 +259,7 @@ jobs:
           if-no-files-found: error
 
       - name: Install Miniforge
-        uses: conda-incubator/setup-miniconda@v3
+        uses: conda-incubator/setup-miniconda@v4
         with:
           miniforge-version: "latest"
           auto-update-conda: true
@@ -390,7 +390,7 @@ jobs:
           merge-multiple: true
 
       - name: Install Miniforge
-        uses: conda-incubator/setup-miniconda@v3
+        uses: conda-incubator/setup-miniconda@v4
         with:
           miniforge-version: "latest"
           auto-update-conda: true
@@ -429,7 +429,7 @@ jobs:
           merge-multiple: true
 
       - name: Install Miniforge
-        uses: conda-incubator/setup-miniconda@v3
+        uses: conda-incubator/setup-miniconda@v4
         with:
           miniforge-version: "latest"
           auto-update-conda: true
