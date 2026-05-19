@@ -10,7 +10,7 @@ on:
 
 env:
   OS_LIST_UBUNTU: '["ubuntu-latest"]'
-  OS_LIST_ALL: '["ubuntu-latest", "windows-latest", "macos-latest", "macos-15-intel"]'
+  OS_LIST_ALL: '["ubuntu-latest", "windows-2022", "macos-latest", "macos-15-intel"]'
 
 
 jobs:
